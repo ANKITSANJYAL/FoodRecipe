@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter API Token</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Recipe Generator</h1>
+        <p>Please enter your OpenAI API token to continue:</p>
+        <form id="tokenForm">
+            <input type="text" id="apiToken" name="apiToken" placeholder="Enter your OpenAI API token" required>
+            <button type="submit">Enter</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('tokenForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let apiToken = document.getElementById('apiToken').value;
+            fetch('/set_token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ apiToken: apiToken })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/main';  // Redirect to the main page
+                } else {
+                    alert('Invalid token or error occurred.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

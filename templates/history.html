@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .recipe-item {
+            cursor: pointer;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>History</h1>
+        <div id="historyList">
+            <!-- History will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display history
+        fetch('/get_history')
+            .then(response => response.json())
+            .then(data => {
+                const historyList = document.getElementById('historyList');
+                data.forEach(recipe => {
+                    const recipeItem = document.createElement('div');
+                    recipeItem.className = 'recipe-item';
+                    recipeItem.innerHTML = `
+                        <h3>${recipe.name}</h3>
+                        <p>${recipe.ingredients}</p>
+                    `;
+                    recipeItem.addEventListener('click', () => {
+                        window.location.href = `/view_recipe?name=${encodeURIComponent(recipe.name)}`;
+                    });
+                    historyList.appendChild(recipeItem);
+                });
+            });
+    </script>
+</body>
+</html>
