@@ -1,0 +1,8 @@
+Flask==3.0.0
+openai==0.28
+Pillow==10.0.1
+python-dotenv==1.0.0
+
+# Development dependencies
+pytest==7.4.0
+Flask-Testing==0.8.1
