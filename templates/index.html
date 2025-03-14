@@ -55,7 +55,55 @@
 <body>
     <div class="container">
         <h1>Recipe Generator</h1>
+        <!-- Add this inside the <head> or <body> -->
+        <style>
+            #loading-spinner {
+                display: none;
+                /* Hidden by default */
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(255, 255, 255, 0.9);
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            }
 
+            .spinner {
+                border: 8px solid #f3f3f3;
+                border-top: 8px solid #3498db;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .loading-text {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 16px;
+                color: #333;
+            }
+        </style>
+
+        <!-- Add this inside the <body> -->
+        <div id="loading-spinner">
+            <div class="spinner"></div>
+            <p class="loading-text">Generating recipe... Please wait.</p>
+        </div>
         <!-- Form for text input -->
         <form id="ingredientForm">
             <label for="ingredients">Enter Ingredients (comma-separated):</label>
@@ -94,6 +142,10 @@
         // Handle text-based recipe generation
         document.getElementById('ingredientForm').addEventListener('submit', function (event) {
             event.preventDefault();
+
+            // Show the loading spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+
             let ingredients = document.getElementById('ingredients').value;
             fetch('/generate_recipe', {
                 method: 'POST',
@@ -126,12 +178,23 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    alert('Failed to generate recipe. Please try again.');
+                })
+                .finally(() => {
+                    // Hide the loading spinner
+                    document.getElementById('loading-spinner').style.display = 'none';
+
+                    // Clear the text input form
+                    document.getElementById('ingredientForm').reset();
                 });
         });
-
         // Handle image-based recipe generation
         document.getElementById('imageForm').addEventListener('submit', function (event) {
             event.preventDefault();
+
+            // Show the loading spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+
             let formData = new FormData();
             formData.append('image', document.getElementById('image').files[0]);
 
@@ -174,6 +237,14 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    alert('Failed to generate recipe. Please try again.');
+                })
+                .finally(() => {
+                    // Hide the loading spinner
+                    document.getElementById('loading-spinner').style.display = 'none';
+
+                    // Clear the image input form
+                    document.getElementById('imageForm').reset();
                 });
         });
 
@@ -203,6 +274,13 @@
                     console.error('Error:', error);
                 });
         });
+        // Show the loading spinner and blur the background
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.body.classList.add('blur-background');
+
+        // Hide the loading spinner and remove the blur effect
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.body.classList.remove('blur-background');
     </script>
 </body>
 
