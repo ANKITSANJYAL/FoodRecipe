@@ -120,15 +120,27 @@
         </form>
 
         <!-- Output section -->
-        <div id="recipeOutput" class="recipe-box" style="display:none;">
-            <h2 id="recipeTitle"></h2>
-            <h3>Ingredients:</h3>
-            <p id="recipeIngredients"></p>
-            <h3>Instructions:</h3>
-            <p id="recipeInstructions"></p>
-            <h3>Nutritional Information:</h3>
-            <p id="recipeNutrition"></p>
-            <button id="addToFavorites" style="display:none;">Add to Favorites</button>
+        <!-- Output section -->
+        <div id="recipeOutput" class="recipe-box" style="display: none;">
+            <div style="display: flex; gap: 20px;">
+                <!-- Recipe Details (Left Side) -->
+                <div style="flex: 2;">
+                    <h2 id="recipeTitle"></h2>
+                    <h3>Ingredients:</h3>
+                    <p id="recipeIngredients"></p>
+                    <h3>Instructions:</h3>
+                    <p id="recipeInstructions"></p>
+                    <h3>Nutritional Information:</h3>
+                    <p id="recipeNutrition"></p>
+                    <button id="addToFavorites" style="display: none;">Add to Favorites</button>
+                </div>
+
+                <!-- Image Preview (Right Side) -->
+                <div id="image-preview" style="flex: 1;">
+                    <img id="uploaded-image" src="" alt="Uploaded Image"
+                        style="max-width: 100%; height: auto; display: none;">
+                </div>
+            </div>
         </div>
 
         <!-- Navigation links -->
@@ -189,6 +201,22 @@
                 });
         });
         // Handle image-based recipe generation
+        document.getElementById('image').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // Display the image preview
+                    const imgElement = document.getElementById('uploaded-image');
+                    imgElement.src = e.target.result;
+                    imgElement.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // After generating the recipe, update the image preview with the returned image data
+        // Handle image-based recipe generation
         document.getElementById('imageForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
@@ -202,12 +230,18 @@
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate recipe');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log("Response from server:", data); // Debugging output
 
                     // Check if the recipe data exists
                     if (data.recipe) {
+                        // Display the recipe
                         document.getElementById('recipeOutput').style.display = 'block';
                         document.getElementById('addToFavorites').style.display = 'block';
                         document.getElementById('recipeTitle').innerText = data.recipe.recipe_title;
@@ -218,6 +252,15 @@
                         let nutrition = data.recipe.nutrition;
                         let nutritionText = Object.keys(nutrition).map(key => `${key}: ${nutrition[key]}`).join('\n');
                         document.getElementById('recipeNutrition').innerText = nutritionText;
+
+                        // Display the uploaded image
+                        const imgElement = document.getElementById('uploaded-image');
+                        if (data.image_data) {
+                            imgElement.src = `data:image/png;base64,${data.image_data}`;
+                            imgElement.style.display = 'block';
+                        } else {
+                            imgElement.style.display = 'none'; // Hide if no image data
+                        }
 
                         // Save to history
                         fetch('/add_to_history', {
@@ -232,7 +275,7 @@
                             })
                         });
                     } else {
-                        console.error("Recipe data not found in response:", data);
+                        throw new Error('Recipe data not found in response');
                     }
                 })
                 .catch(error => {

@@ -173,11 +173,12 @@ def generate_recipe_from_image_route():
     img_file = request.files['image']
     img = Image.open(img_file.stream).convert("RGB")  # Convert image to RGB
 
-    # Step 1: Recognize ingredients using OpenAI GPT-4 Turbo
+    # Convert image to base64 for display
     buffered = io.BytesIO()
-    img.save(buffered, format="PNG")  # Convert image to bytes
-    img_str = base64.b64encode(buffered.getvalue()).decode()  # Encode image
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
 
+    # Step 1: Recognize ingredients using OpenAI GPT-4 Turbo
     response = openai.ChatCompletion.create(
         model="gpt-4-turbo",
         messages=[
@@ -197,16 +198,16 @@ def generate_recipe_from_image_route():
     ingredient_list = raw_ingredients.split("\n")[1:]  # Remove the first line
     cleaned_ingredients = ", ".join([item.split(". ", 1)[-1] for item in ingredient_list])  # Remove numbering
 
-    # print("Formatted Ingredients for Recipe Generation:", cleaned_ingredients)  # Debugging output
-
     # Generate recipe using cleaned ingredients
     recipe = generate_recipe(cleaned_ingredients)
     
     return jsonify({
         'recognized_ingredients': cleaned_ingredients,
-        'recipe': recipe
+        'recipe': recipe,
+        'image_data': img_str  # Return the base64-encoded image data
     })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))  # Default to 5000 if PORT is not set
     app.run(host="0.0.0.0", port=port)
+
